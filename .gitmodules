@@ -8,8 +8,8 @@
   branch = main
 [submodule "ccpp/physics"]
   path = ccpp/physics
-  url = https://github.com/NOAA-SWPC/ccpp-physics
-  branch = develop
+  url = https://github.com/SvetlanaKarol-NOAA/ccpp-physics
+  branch = fv3_wamphys
 [submodule "upp"]
   path = upp
   url = https://github.com/NOAA-EMC/UPP
