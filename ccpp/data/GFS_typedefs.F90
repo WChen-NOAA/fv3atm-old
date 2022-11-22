@@ -6950,7 +6950,15 @@ module GFS_typedefs
      allocate(Diag%dtdt_iwamph(IM,Model%levs)  )   
      allocate(Diag%do1dt_iwamph(IM,Model%levs)  )  
      allocate(Diag%do2dt_iwamph(IM,Model%levs)  ) 
+     
+     allocate(Diag%dudt_wamph(IM,Model%levs)  )
+     allocate(Diag%dvdt_wamph(IM,Model%levs)  ) 
+     allocate(Diag%dtdt_wamph(IM,Model%levs)  )   
+     allocate(Diag%do1dt_wamph(IM,Model%levs)  )  
+     allocate(Diag%do2dt_wamph(IM,Model%levs)  )     
+     
      allocate(Diag%dqdt_iwamph(IM,Model%levs)  ) 
+     
      allocate(Diag%zmt_ipe(IM,Model%levs)  )
      allocate(Diag%mmt_ipe(IM,Model%levs)  )  
      allocate(Diag%jhr_ipe(IM,Model%levs)  ) 
