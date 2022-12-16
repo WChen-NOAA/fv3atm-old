@@ -2836,6 +2836,12 @@
   units = flag
   dimensions = ()
   type = logical
+[flag_for_wam_generic_tend]
+  standard_name = flag_for_generic_tendency_due_to_wamphys
+  long_name = true if GFS_WAM_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
 [lssav]
   standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
@@ -5443,6 +5449,30 @@
 [index_of_process_photochem]
   standard_name = index_of_photochemistry_process_in_cumulative_change_index
   long_name = index of photochemistry process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+[index_of_process_wamphys]
+  standard_name = index_of_wamphys_process_in_cumulative_change_index
+  long_name = index of wamphys process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+[index_of_process_wammd]
+  standard_name = index_of_wamolec_process_in_cumulative_change_index
+  long_name = index of wam molecular dissipation process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+[index_of_process_wamrad]
+  standard_name = index_of_wamrad_process_in_cumulative_change_index
+  long_name = index of wam rad process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+[index_of_process_wamion]
+  standard_name = index_of_wamion_process_in_cumulative_change_index
+  long_name = index of wam ion process in second dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer
@@ -8063,7 +8093,56 @@
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
-  kind = kind_phys             
+  kind = kind_phys
+[dudt_wammd]
+  standard_name = instant_momentum_tendency_in_x_wind_due_to_wam_molecular_diss
+  long_name = instantaneous zonal wind momentum tendency due to wam molecular dissipation
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys 
+[dvdt_wammd]
+  standard_name = instant_momentum_tendency_in_y_wind_due_to_wam_molecular_diss
+  long_name = instantaneous meridional wind momentum tendency due to wam molecular dissipation
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys 
+[dtdt_wammd]
+  standard_name = instant_temperature_tendency_due_to_wam_molecular_diss
+  long_name = instantaneous temperature tendency due to wam molecular dissipation
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[dudt_wamion]
+  standard_name = instant_momentum_tendency_in_x_wind_due_to_wam_ion
+  long_name = instantaneous zonal wind momentum tendency due to wam ion
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys 
+[dvdt_wamion]
+  standard_name = instant_momentum_tendency_in_y_wind_due_to_wam_ion
+  long_name = instantaneous meridional wind momentum tendency due to wam ion
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys 
+[dtdt_wamion]
+  standard_name = instant_temperature_tendency_due_to_wam_ion
+  long_name = instantaneous temperature tendency due to wam ion
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[dtdt_wamrad]
+  standard_name = instant_temperature_tendency_due_to_wam_rad
+  long_name = instantaneous temperature tendency due to wam rad
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys                                                      
 [do1dt_iwamph]
   standard_name = instant_atomic_oxygen_tendency_due_to_wam_physics
   long_name = instantaneous atomic_oxygen tendency due to wam physics
@@ -8648,7 +8727,56 @@
   units = mmr s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
-  kind = kind_phys 
+  kind = kind_phys
+[du3dt_wammd]
+  standard_name = tav_momentum_tendency_in_x_wind_due_to_wam_molecular_diss
+  long_name = time averaged zonal wind momentum tendency due to wam molecular dissipation
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[dv3dt_wammd]
+  standard_name = tav_momentum_tendency_in_y_wind_due_to_wam_molecular_diss
+  long_name = time averaged meridional wind momentum tendency due to wam molecular dissipation
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[dt3dt_wammd]
+  standard_name = tav_temperature_tendency_due_to_wam_molecular_diss
+  long_name = time averaged temperature tendency due to wam molecular dissipation
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[du3dt_wamion]
+  standard_name = tav_momentum_tendency_in_x_wind_due_to_wam_ion
+  long_name = time averaged zonal wind momentum tendency due to wam ion
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[dv3dt_wamion]
+  standard_name = tav_momentum_tendency_in_y_wind_due_to_wam_ion
+  long_name = time averaged meridional wind momentum tendency due to wam ion
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[dt3dt_wamion]
+  standard_name = tav_temperature_tendency_due_to_wam_ion
+  long_name = time averaged temperature tendency due to wam ion
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[dt3dt_wamrad]
+  standard_name = tav_temperature_tendency_due_to_wam_rad
+  long_name = time averaged temperature tendency due to wam rad
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys    
 ########################################################################
 [ccpp-table-properties]
   name = GFS_data_type
