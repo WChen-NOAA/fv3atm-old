@@ -4,7 +4,6 @@
 !
     subroutine post_alctvars(imi,jmi,lmi,mype,nwtlpes,lead_write, mpicomp,  &
                              jts,jte,jtsgrp,jtegrp,its,ite,itsgrp,itegrp)
-!                             jts,jte,jtsgrp,jtegrp)
 !
 !
 !   revision history:
@@ -124,6 +123,10 @@
 !
       isumm=0
       isumm2=0
+      if(allocated(isxa)) deallocate(isxa)
+      if(allocated(jsxa)) deallocate(jsxa)
+      if(allocated(iexa)) deallocate(iexa)
+      if(allocated(jexa)) deallocate(jexa)
       allocate(isxa(0:num_procs-1) )
       allocate(jsxa(0:num_procs-1) )
       allocate(iexa(0:num_procs-1) )
@@ -217,12 +220,14 @@
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !---------------------------------------------------------------------
 !
-  subroutine read_postnmlt(kpo,kth,kpv,po,th,pv,nlunit,post_namelist)
+  subroutine read_postnmlt(kpo,kth,kpv,po,th,pv,post_namelist)
 !
       use ctlblk_mod, only : komax,fileNameD3D,lsm,lsmp1,spl,spldef,  &
                              lsmdef,ALSL,me,d3d_on,gocart_on,hyb_sigp,&
                              pthresh,novegtype,ivegsrc,icu_physics,   &
-                             isf_surface_physics,modelname,submodelname
+                             isf_surface_physics,modelname,submodelname,&
+                             rdaod,d2d_chem,nasa_on,gccpp_on
+      use upp_ifi_mod, only: write_ifi_debug_files
 !
 !    revision history:
 !    Jul 2019 Jun Wang: read post namelist
@@ -230,14 +235,17 @@
       implicit none
 !---
       character (len=*), intent(in) :: post_namelist
-      integer :: kpo,kth,kpv,nlunit
+      integer,intent(out) :: kpo,kth,kpv
+      real(4),dimension(komax),intent(out) :: po,th,pv
+      integer :: nlunit
       real :: untcnvt
       logical :: popascal
-      real,dimension(komax) :: po,th,pv
+      integer l,k
+
       namelist/nampgb/kpo,po,kth,th,kpv,pv,popascal,d3d_on,gocart_on,  &
-                      hyb_sigp
+                      hyb_sigp,write_ifi_debug_files,rdaod,nasa_on,gccpp_on, &
+                      d2d_chem
       namelist/model_inputs/modelname,submodelname
-      integer l,k,iret
 !---------------------------------------------------------------------
 !
 !      print *,'in read_postnmlt'
@@ -253,26 +261,21 @@
       d3d_on      = .false.
       gocart_on   = .false.
       popascal    = .false.
+      rdaod       = .false.
+      nasa_on     = .false.
+      gccpp_on    = .false.
+      d2d_chem    = .false.
 !
-      if (me == 0) print *,' nlunit=',nlunit,' post_namelist=', &
-     &                      post_namelist
+      if (me == 0) print *,'post_namelist=',post_namelist
 !jw post namelist is using the same file itag as standalone post
-      if (nlunit > 0) then
-        open (unit=nlunit,file=post_namelist)
-        rewind(nlunit)
-!        read(nlunit) !skip fileName
-!        read(nlunit) !skip ioFORM
-!        read(nlunit) !skip outform
-!        read(nlunit,'(a19)') DateStr
-!        read(nlunit) !skil full modelname
-        read(nlunit,model_inputs,iostat=iret,end=119)
-        read(nlunit,nampgb,iostat=iret,end=119)
-      endif
- 119  continue
+      open (newunit=nlunit,file=post_namelist,status='old',action='read')
+      read (nlunit,model_inputs)
+      read (nlunit,nampgb)
+      close (nlunit)
       if (me == 0) then
-        print*,'komax,iret for nampgb= ',komax,iret
-        print*,'komax,kpo,kth,th,kpv,pv,popascal== ',komax,kpo            &
-     &  ,kth,th(1:kth),kpv,pv(1:kpv),popascal,' gocart_on=',gocart_on
+        print*,'komax,kpo,kth,th,kpv,pv,popascal= ',komax,kpo            &
+     &  ,kth,th(1:kth),kpv,pv(1:kpv),popascal,' gocart_on=',gocart_on    &
+     &  ,' rdaod=',rdaod
        endif
 !
 ! set up pressure level from POSTGPVARS or DEFAULT
@@ -347,7 +350,7 @@
       character(*),intent(in) :: post_gribversion
 !
       IF(trim(post_gribversion)=='grib2') then
-         call  grib_info_finalize()
+         ! call  grib_info_finalize()
       ENDIF
 !
       call de_allocate
