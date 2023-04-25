@@ -9484,7 +9484,6 @@
   intent = inout
   active = (do_lightning_threat_index_calculations)
 
->>>>>>> aed060737ad8e65b4a101e5c61724fb8adbe94f5
 ########################################################################
 [ccpp-table-properties]
   name = GFS_data_type
