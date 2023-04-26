@@ -2013,7 +2013,8 @@ module GFS_typedefs
     real (kind=kind_phys), pointer :: dws3dt_oss(:,:) => null()  !< time aver GFS_phys tend for windspeed OSS
     real (kind=kind_phys), pointer :: dws3dt_ofd(:,:) => null()  !< time aver GFS_phys tend for windspeed OFD
 !
-#ifdef MULTI_GASES    
+#ifdef MULTI_GASES   
+    real (kind=kind_phys), pointer :: dudt_wamph(:,:)  => null()   !< dailyaver WAM_phys tend for WE-U 
     real (kind=kind_phys), pointer :: dvdt_wamph(:,:)  => null()   !< daily aver WAM_phys tend for SN-V
     real (kind=kind_phys), pointer :: dtdt_wamph(:,:)  => null()   !< daily aver WAM_phys tend for Temp
     real (kind=kind_phys), pointer :: do1dt_wamph(:,:) => null()   !< daily aver WAM_phys tend for O
@@ -3716,7 +3717,7 @@ module GFS_typedefs
                                thermodyn_id, sfcpress_id,                                   &
                           !--- coupling parameters
                                cplflx, cplice, cplocn2atm, cplwav, cplwav2atm, cplaqm,      &
-                               cplchm, cpl_imp_mrg, cpl_imp_dbg, rrfs_smoke,                &
+                               cplchm, cpl_imp_mrg, cpl_imp_dbg, rrfs_sd,                   &
                                use_cice_alb,                                                &
 
 #ifdef MULTI_GASES
