@@ -30,10 +30,8 @@
       <scheme>GFS_suite_stateout_reset</scheme>
       <scheme>get_prs_fv3</scheme>
       <scheme>GFS_suite_interstitial_1</scheme>
-      <scheme>GFS_WAM_generic_pre</scheme>
       <scheme>wamphys</scheme>
       <scheme>wamphys_post</scheme>
-      <scheme>GFS_WAM_generic_post</scheme>   
       <scheme>GFS_surface_generic_pre</scheme>
       <scheme>GFS_surface_composites_pre</scheme>
       <scheme>dcyc2t3</scheme>
