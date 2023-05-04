@@ -3907,23 +3907,12 @@ module GFS_typedefs
                                thermodyn_id, sfcpress_id,                                   &
                           !--- coupling parameters
                                cplflx, cplice, cplocn2atm, cplwav, cplwav2atm, cplaqm,      &
-                               cplchm, cpl_imp_mrg, cpl_imp_dbg, rrfs_sd,                   &
-                               use_cice_alb,                                                &
-
+                               cplchm, cpllnd, cpl_imp_mrg, cpl_imp_dbg, rrfs_sd,           &
+                               use_cice_alb, use_med_flux,                                  &
 #ifdef MULTI_GASES
                                lsidea, do_wamphys, do_wamgfs_rad,do_wamipe,do_wamphys_diag, & 
-!			       wam_JH0, wam_JH_tanh, wam_JH_semiann, wam_JH_ann, wam_JH_sto,&
-!			       wam_JH_st1,wam_skeddy0, wam_skeddy_ann, wam_skeddy_semiann,  &
-!			       wam_tkeddy0, wam_tkeddy_ann, wam_tkeddy_semiann,             &	
-!			       wam_f107_fix, wam_f107a_fix, wam_kp_fix, wam_gW_fix,         &
-!			       wam_tiros_activity_fix, 
-!                             			                                            & 
-!                              lsidea, weimer_model, f107_kp_size, f107_kp_interval,       &
-!                               f107_kp_skip_size, f107_kp_data_size, f107_kp_read_in_start,&
-!                               ipe_to_wam_coupling,                                        &
 #else
-
-                                lsidea, use_med_flux                                                    &
+                                lsidea,                                                     &
 #endif
                           !--- radiation parameters
                                fhswr, fhlwr, levr, nfxr, iaerclm, iflip, isol, ico2, ialb,  &
