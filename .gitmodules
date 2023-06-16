@@ -11,7 +11,7 @@
 [submodule "ccpp/physics"]
   path = ccpp/physics
   url = https://github.com/WChen-NOAA/ccpp-physics
-  branch = fv3wam2.2
+  branch = wam2c
 #  url = https://github.com/ufs-community/ccpp-physics
 #  branch = ufs/dev
 [submodule "upp"]
