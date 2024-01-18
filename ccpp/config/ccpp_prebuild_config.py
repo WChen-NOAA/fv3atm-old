@@ -21,7 +21,7 @@ VARIABLE_DEFINITION_FILES = [
     'physics/physics/Radiation/RRTMG/radlw_param.f',
     'physics/physics/photochem/h2o_def.f',
     'physics/physics/photochem/module_ozphys.F90',
-    'physics/physics/WAM_phys/wamphys_swdef.F90',
+    #'physics/physics/WAM_phys/wamphys_swdef.F90',
     'data/CCPP_typedefs.F90',
     'data/GFS_typedefs.F90',
     'data/CCPP_data.F90',
@@ -74,8 +74,6 @@ SCHEME_FILES = [
     # Relative path to source (from where ccpp_prebuild.py is called) : [ list of physics sets in which scheme may be called ];
     # current restrictions are that each scheme can only belong to one physics set, and all schemes within one group in the
     # suite definition file have to belong to the same physics set
-    'physics/physics/WAM_phys/wamphys.F90',
-    'physics/physics/WAM_phys/wamphys_post.F90',
     'physics/physics/Interstitials/UFS_SCM_NEPTUNE/GFS_DCNV_generic_pre.F90',
     'physics/physics/Interstitials/UFS_SCM_NEPTUNE/GFS_DCNV_generic_post.F90',
     'physics/physics/Interstitials/UFS_SCM_NEPTUNE/GFS_GWD_generic_pre.F90',
@@ -167,6 +165,8 @@ SCHEME_FILES = [
     'physics/physics/MP/Thompson/mp_thompson_post.F90',
     'physics/physics/MP/Zhao_Carr/zhaocarr_gscond.f',
     'physics/physics/MP/Zhao_Carr/zhaocarr_precpd.f',
+    'physics/physics/WAM_phys/wamphys.F90',
+    'physics/physics/WAM_phys/wamphys_post.F90',
     'physics/physics/PBL/HEDMF/hedmf.f',
     'physics/physics/PBL/SHOC/moninshoc.f',
     'physics/physics/PBL/SHOC/shoc.F90',
@@ -201,7 +201,6 @@ SCHEME_FILES = [
     'physics/physics/SFC_Models/Lake/CLM/clm_lake.f90',
     'physics/physics/SFC_Models/Ocean/UFS/sfc_ocean.F',
     'physics/physics/SFC_Models/SeaIce/CICE/sfc_sice.f',
->>>>>>> 5e7f1961ff4ee0e4793818589a3942482ca8967e
     'physics/physics/smoke_dust/rrfs_smoke_wrapper.F90',
     'physics/physics/smoke_dust/rrfs_smoke_postpbl.F90',
     'physics/physics/tools/get_prs_fv3.F90',
