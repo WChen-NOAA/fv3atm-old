@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_GFS_v16_fv3wam" version="1">
+<suite name="FV3_GFS_v16_fv3wamphys" version="1">
   <!-- <init></init> -->
   <group name="fast_physics">
     <subcycle loop="1">
@@ -30,11 +30,15 @@
     </subcycle>
   </group>
   <group name="physics">
-    <subcycle loop="1">
+    <subcycle loop="1"> 
       <scheme>GFS_suite_interstitial_phys_reset</scheme>
       <scheme>GFS_suite_stateout_reset</scheme>
       <scheme>get_prs_fv3</scheme>
       <scheme>GFS_suite_interstitial_1</scheme>
+      <scheme>GFS_WAM_generic_pre</scheme>
+      <scheme>wamphys</scheme>
+      <scheme>wamphys_post</scheme>
+      <scheme>GFS_WAM_generic_post</scheme>     
       <scheme>GFS_surface_generic_pre</scheme>
       <scheme>GFS_surface_composites_pre</scheme>
       <scheme>dcyc2t3</scheme>
@@ -42,7 +46,7 @@
       <scheme>GFS_suite_interstitial_2</scheme>
     </subcycle>
     <!-- Surface iteration loop -->
-    <subcycle loop="2">
+    <subcycle loop="2">      
       <scheme>sfc_diff</scheme>
       <scheme>GFS_surface_loop_control_part1</scheme>
       <scheme>sfc_ocean</scheme>
@@ -55,13 +59,13 @@
       <scheme>GFS_surface_composites_post</scheme>
       <scheme>sfc_diag</scheme>
       <scheme>sfc_diag_post</scheme>
-      <scheme>GFS_surface_generic_post</scheme>
+      <scheme>GFS_surface_generic_post</scheme>  
       <scheme>GFS_PBL_generic_pre</scheme>
       <scheme>satmedmfvdifq</scheme>
       <scheme>GFS_PBL_generic_post</scheme>
       <scheme>GFS_GWD_generic_pre</scheme>
       <scheme>cires_ugwp</scheme>
-      <scheme>cires_ugwp_post</scheme>
+      <scheme>cires_ugwp_post</scheme>      
       <scheme>GFS_GWD_generic_post</scheme>
       <scheme>GFS_suite_stateout_update</scheme>
       <scheme>ozphys_2015</scheme>
