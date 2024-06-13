@@ -3256,6 +3256,12 @@
   units = flag
   dimensions = ()
   type = logical
+[flag_for_wam_generic_tend]
+  standard_name = flag_for_generic_tendency_due_to_wamphys
+  long_name = true if GFS_WAM_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
 [lssav]
   standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
@@ -3460,6 +3466,130 @@
   units = flag
   dimensions = ()
   type = logical
+[do_wamphys]
+  standard_name = flag_for_wamphys
+  long_name = flag to activate version 1 of wamphys
+  units = flag
+  dimensions = ()
+  type = logical
+[do_wamipe]
+  standard_name = flag_for_wamipe_physics_coupling
+  long_name = flag for wam-ipe physics coupling
+  units = flag
+  dimensions = ()
+  type = logical
+[do_wamgfs_rad]
+  standard_name = flag_for_wamgfs_radiation_merge
+  long_name = flag for merging wam and gfs total radiation
+  units = flag
+  dimensions = ()
+  type = logical
+[do_wamphys_diag]
+  standard_name = flag_for_wam_physics_diagnostics
+  long_name = flag for wam physics diagnostics in wamphys_post.F90
+  units = flag
+  dimensions = ()
+  type = logical
+[csw_f107]
+  standard_name = current_timestep_value_of_10_7cm_solar_flux
+  units = W m-2
+  type = real 
+  kind = kind_phys
+  dimensions = ()
+[csw_f107d]
+  standard_name = current_timestep_value_of_41_day_averaged_10_7cm_solar_flux
+  units = W m-2
+  type = real
+  kind = kind_phys
+  dimensions = () 
+[csw_kp]
+  standard_name = current_timestep_value_of_planetary_3_hour_geomagnetic_activity
+  units = count
+  type = real 
+  kind = kind_phys
+  dimensions = ()
+[csw_kpa]
+  standard_name = current_timestep_value_of_average_of_the_previous_8_planetary_3_hour_geomagnetic_activity
+  units = count 
+  type = real 
+  kind = kind_phys
+  dimensions = ()
+[csw_ap]
+  standard_name = current_timestep_value_of_planetary_3_hour_geomagnetic_activity_index 
+  units = count
+  type = real 
+  kind = kind_phys
+  dimensions = ()
+[csw_apa]
+  standard_name = current_timestep_value_of_average_of_the_previous_8_planetary_3_hour_geomagnetic_activity_indices
+  units = count
+  type = real 
+  kind = kind_phys
+  dimensions = ()
+[csw_nhp]
+  standard_name = current_timestep_value_of_northern_hemispheric_auroral_power
+  units = GW
+  type = real 
+  kind = kind_phys
+  dimensions = ()
+[csw_nhpi]
+  standard_name = current_timestep_value_of_northern_hemispheric_auroral_power_index
+  units = count
+  type = real
+  kind = kind_phys
+  dimensions = ()
+[csw_shp]
+  standard_name = current_timestep_value_of_southern_hemispheric_auroral_power
+  units = GW
+  type = real 
+  kind = kind_phys
+  dimensions = ()
+[csw_shpi]
+  standard_name = current_timestep_value_of_southern_hemispheric_auroral_power_index
+  units = count
+  type = real
+  kind = kind_phys
+  dimensions = ()
+[csw_den]
+  standard_name = current_timestep_value_of_solar_wind_density
+  units = cm-3
+  type = real
+  kind = kind_phys
+  dimensions = ()
+[csw_ang]
+  standard_name = current_timestep_value_of_solar_wind_interplanetary_magnetic_field_angle_arctan_BzBy
+  units = degree
+  type = real 
+  kind = kind_phys
+  dimensions = ()
+[csw_bz]
+  standard_name = current_timestep_value_of_northward_solar_wind_interplanetary_magnetic_field
+  units = nT
+  type = real 
+  kind = kind_phys
+  dimensions = ()
+[csw_bt]
+  standard_name = current_timestep_value_of_total_solar_wind_interplanetary_magnetic_field
+  units = nT
+  type = real
+  kind = kind_phys
+  dimensions = ()
+[csw_vel]
+  standard_name = current_timestep_value_of_Earthward_solar_wind_velocity
+  units = km s-1
+  type = real 
+  kind = kind_phys
+  dimensions = ()
+[csw_time]
+  standard_name = current_value_of_time
+  units = seconds
+  type = real 
+  dimensions = ()  
+[sw_ktprev]
+  standard_name = previous_time_step_number
+  units = count
+  type = integer
+  dimensions = ()      
 [use_med_flux]
   standard_name = do_mediator_atmosphere_ocean_fluxes
   long_name = flag for using atmosphere-ocean fluxes form mediator (default false)
@@ -6128,6 +6258,30 @@
   units = index
   dimensions = ()
   type = integer
+[index_of_process_wamphys]
+  standard_name = index_of_wamphys_process_in_cumulative_change_index
+  long_name = index of wamphys process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+[index_of_process_wammd]
+  standard_name = index_of_wamolec_process_in_cumulative_change_index
+  long_name = index of wam molecular dissipation process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+[index_of_process_wamrad]
+  standard_name = index_of_wamrad_process_in_cumulative_change_index
+  long_name = index of wam rad process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+[index_of_process_wamion]
+  standard_name = index_of_wamion_process_in_cumulative_change_index
+  long_name = index of wam ion process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
 [is_photochem]
   standard_name = flags_for_photochemistry_processes_to_sum
   long_name = flags for photochemistry processes to sum as the total photochemistry process cumulative change
@@ -6164,6 +6318,18 @@
   units = index
   dimensions = ()
   type = integer
+[nto2]
+  standard_name = index_of_moxygen_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for molecular oxygen mass mixing ratio
+  units = index
+  dimensions = ()
+  type = integer
+[nto1]
+  standard_name = index_of_aoxygen_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for atomic oxygen mass mixing ratio
+  units = index
+  dimensions = ()
+  type = integer   
 [ntcw]
   standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
@@ -9117,6 +9283,137 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
+[dudt_iwamph]
+  standard_name = instant_momentum_tendency_in_x_wind_due_to_wam_physics
+  long_name = instantaneous zonal wind momentum tendency due to wam physics
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys 
+[dvdt_iwamph]
+  standard_name = instant_momentum_tendency_in_y_wind_due_to_wam_physics
+  long_name = instantaneous meridional wind momentum tendency due to wam physics
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys 
+[dtdt_iwamph]
+  standard_name = instant_temperature_tendency_due_to_wam_physics
+  long_name = instantaneous temperature tendency due to wam physics
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[dudt_wammd]
+  standard_name = instant_momentum_tendency_in_x_wind_due_to_wam_molecular_diss
+  long_name = instantaneous zonal wind momentum tendency due to wam molecular dissipation
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys 
+[dvdt_wammd]
+  standard_name = instant_momentum_tendency_in_y_wind_due_to_wam_molecular_diss
+  long_name = instantaneous meridional wind momentum tendency due to wam molecular dissipation
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys 
+[dtdt_wammd]
+  standard_name = instant_temperature_tendency_due_to_wam_molecular_diss
+  long_name = instantaneous temperature tendency due to wam molecular dissipation
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[dudt_wamion]
+  standard_name = instant_momentum_tendency_in_x_wind_due_to_wam_ion
+  long_name = instantaneous zonal wind momentum tendency due to wam ion
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys 
+[dvdt_wamion]
+  standard_name = instant_momentum_tendency_in_y_wind_due_to_wam_ion
+  long_name = instantaneous meridional wind momentum tendency due to wam ion
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys 
+[dtdt_wamion]
+  standard_name = instant_temperature_tendency_due_to_wam_ion
+  long_name = instantaneous temperature tendency due to wam ion
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[dtdt_wamrad]
+  standard_name = instant_temperature_tendency_due_to_wam_rad
+  long_name = instantaneous temperature tendency due to wam rad
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys                                                      
+[do1dt_iwamph]
+  standard_name = instant_atomic_oxygen_tendency_due_to_wam_physics
+  long_name = instantaneous atomic_oxygen tendency due to wam physics
+  units = mmr s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[do2dt_iwamph]
+  standard_name = instant_molecular_oxygen_tendency_due_to_wam_physics
+  long_name = instantaneous molecular oxygen tendency due to wam physics
+  units = mmr s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys 
+[dqdt_iwamph]
+  standard_name = instant_qozone_tendency_due_to_wam_physics
+  long_name = instantaneous qozone tendency due to wam physics
+  units = mmr s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[zmt_ipe]
+  standard_name = tendency_of_WAM_horizontal_eastward_zonal_winds_from_IPE_ion_drag
+  long_name =  tendency WAM horizontal eastward zonal winds 
+  units = m s-1
+  type = real 
+  kind = kind_phys
+  dimensions = (horizontal_loop_extent, vertical_layer_dimension)
+  intent = in  
+[mmt_ipe]
+  standard_name =  tendency_of_WAM_horizontal_northward_winds_from_IPE_ion_drag
+  long_name =  tendency WAM horizontal northward winds 
+  units = m s-1
+  type = real 
+  kind = kind_phys
+  dimensions = (horizontal_loop_extent, vertical_layer_dimension)
+  intent = in
+[jhr_ipe]
+  standard_name = tendency_of_WAM_temperature_from_IPE_Joule_heating
+  long_name =  tendency WAM  temperature from IPE
+  units = K s-1
+  type = real 
+  kind = kind_phys
+  dimensions = (horizontal_loop_extent, vertical_layer_dimension)
+  intent = in
+[shr_ipe]
+  standard_name = WAM_solar_UV_and_EUV_heating
+  long_name =  tendency WAM  UV and EUV heating  
+  units = K s-1
+  type = real
+  kind = kind_phys
+  dimensions = (horizontal_loop_extent, vertical_layer_dimension)
+  intent = in
+[o2dr_ipe]
+  standard_name = auroral_o2_dissociation
+  long_name =   auroral o2 dissociation 
+  units = s-1
+  type = real 
+  kind = kind_phys
+  dimensions = (horizontal_loop_extent, vertical_layer_dimension)
+  intent = in        
 [cldfra]
   standard_name = instantaneous_3d_cloud_fraction
   long_name = instantaneous 3D cloud fraction for all MPs
@@ -9767,6 +10064,90 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
+[dudt_wamph]
+  standard_name = tav_momentum_tendency_in_x_wind_due_to_wam_physics
+  long_name = time averaged zonal wind momentum tendency due to wam physics
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[dvdt_wamph]
+  standard_name = tav_momentum_tendency_in_y_wind_due_to_wam_physics
+  long_name = time averaged meridional wind momentum tendency due to wam physics
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[dtdt_wamph]
+  standard_name = tav_temperature_tendency_due_to_wam_physics
+  long_name = time averaged temperature tendency due to wam physics
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[do1dt_wamph]
+  standard_name = tav_atomic_oxygen_tendency_due_to_wam_physics
+  long_name = time averaged atomic_oxygen tendency due to wam physics
+  units = mmr s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[do2dt_wamph]
+  standard_name = tav_molecular_oxygen_tendency_due_to_wam_physics
+  long_name = time averaged molecular oxygen tendency due to wam physics
+  units = mmr s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[du3dt_wammd]
+  standard_name = tav_momentum_tendency_in_x_wind_due_to_wam_molecular_diss
+  long_name = time averaged zonal wind momentum tendency due to wam molecular dissipation
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[dv3dt_wammd]
+  standard_name = tav_momentum_tendency_in_y_wind_due_to_wam_molecular_diss
+  long_name = time averaged meridional wind momentum tendency due to wam molecular dissipation
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[dt3dt_wammd]
+  standard_name = tav_temperature_tendency_due_to_wam_molecular_diss
+  long_name = time averaged temperature tendency due to wam molecular dissipation
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[du3dt_wamion]
+  standard_name = tav_momentum_tendency_in_x_wind_due_to_wam_ion
+  long_name = time averaged zonal wind momentum tendency due to wam ion
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[dv3dt_wamion]
+  standard_name = tav_momentum_tendency_in_y_wind_due_to_wam_ion
+  long_name = time averaged meridional wind momentum tendency due to wam ion
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[dt3dt_wamion]
+  standard_name = tav_temperature_tendency_due_to_wam_ion
+  long_name = time averaged temperature tendency due to wam ion
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+[dt3dt_wamrad]
+  standard_name = tav_temperature_tendency_due_to_wam_rad
+  long_name = time averaged temperature tendency due to wam rad
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys    
 [ltg1_max]
   standard_name = lightning_threat_index_1
   long_name = lightning threat index 1

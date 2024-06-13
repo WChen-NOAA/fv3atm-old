@@ -699,6 +699,7 @@ module GFS_typedefs
     logical              :: flag_for_pbl_generic_tend  !< true if GFS_PBL_generic should calculate tendencies
     logical              :: flag_for_scnv_generic_tend !< true if GFS_DCNV_generic should calculate tendencies
     logical              :: flag_for_dcnv_generic_tend !< true if GFS_DCNV_generic should calculate tendencies
+    logical              :: flag_for_wam_generic_tend  !< true if GFS_WAM_generic should calculate tendencies
     logical              :: lssav           !< logical flag for storing diagnostics
     integer              :: naux2d          !< number of auxiliary 2d arrays to output (for debugging)
     integer              :: naux3d          !< number of auxiliary 3d arrays to output (for debugging)
@@ -747,9 +748,15 @@ module GFS_typedefs
     logical              :: cpl_imp_dbg     !< default no write import data to file post merge
     logical              :: use_med_flux    !< default .false. - i.e. don't use atmosphere-ocean fluxes imported from mediator
 
-!--- integrated dynamics through earth's atmosphere
-    logical              :: lsidea
-
+!--- integrated dynamics through the Whole Atmosphere of earth's atmosphere (WAM-IDEA)
+  
+!sik 03/2022
+    logical              :: lsidea  
+    logical              :: do_wamipe       ! false no coupling              
+    logical              :: do_wamphys      ! call wam_physics before execution of GFS_physics after GFS_radiation
+    logical              :: do_wamgfs_rad   ! diag merged wam and gfs radiation between 7.5 (52.5 km) & 8.5 (59.5 km) h=7 km
+   !           
+    logical              :: do_wamphys_diag ! diagnostics of WAM tendencies    
 !vay 2018  GW physics switches
 
     logical              :: ldiag_ugwp
@@ -1422,10 +1429,19 @@ module GFS_typedefs
     integer :: index_of_process_non_physics      !< tracer changes caused by everything except physics schemes
     integer :: index_of_process_dfi_radar        !< tracer changes caused by radar mp temperature tendency forcing
     integer :: index_of_process_photochem        !< all changes to ozone
+    integer :: index_of_process_wamphys         !< all changes caused by WAM-PHYS
+    integer :: index_of_process_wam_tracer         !< all changes caused by WAM-PHYS (tracer)
+    integer :: index_of_process_wammd         !< all changes caused by WAM-PHYS (molecular diss)
+    integer :: index_of_process_wamrad         !< all changes caused by WAM-PHYS (wam rad)
+    integer :: index_of_process_wamion         !< all changes caused by WAM-PHYS (wamion)
+    integer :: index_of_process_wam_ipe         !< all changes caused by WAM-PHYS (wam_ipe)
+
     logical, pointer :: is_photochem(:) => null()!< flags for which processes should be summed as photochemical
 
     integer              :: ntqv            !< tracer index for water vapor (specific humidity)
     integer              :: ntoz            !< tracer index for ozone mixing ratio
+    integer              :: nto1            !< tracer index for atomic oxygen mixing ratio   
+    integer              :: nto2            !< tracer index for molecular oxygen mixing ratio        
     integer              :: ntcw            !< tracer index for cloud condensate (or liquid water)
     integer              :: ntiw            !< tracer index for ice water
     integer              :: ntrw            !< tracer index for rain water
@@ -1448,8 +1464,8 @@ module GFS_typedefs
     integer              :: nthz            !< tracer index for hail reflectivity
     integer              :: ntke            !< tracer index for kinetic energy
     integer              :: ntsigma         !< tracer index for updraft area fraction
-    integer              :: nto             !< tracer index for oxygen ion
-    integer              :: nto2            !< tracer index for oxygen
+!    integer              :: nto             !< tracer index for oxygen ion
+!    integer              :: nto2            !< tracer index for oxygen
     integer              :: ntwa            !< tracer index for water friendly aerosol
     integer              :: ntia            !< tracer index for ice friendly aerosol
     integer              :: ntsmoke         !< tracer index for smoke
@@ -1587,6 +1603,10 @@ module GFS_typedefs
     real(kind=kind_phys) :: rhcmax          ! maximum critical relative humidity, replaces rhc_max in physcons.F90
     real(kind=kind_phys) :: huge            !< huge fill value
 
+    real(kind=kind_phys) :: csw_f107,  csw_f107d, csw_kp,    csw_kpa  
+    real(kind=kind_phys) :: csw_nhp,   csw_nhpi,  csw_shp,   csw_shpi, csw_den, csw_ang 
+    real(kind=kind_phys) :: csw_bz,    csw_bt,    csw_vel     
+    integer              :: sw_ktprev 
 !--- lightning threat and diagsnostics
     logical              :: lightning_threat !< report lightning threat indices
 
@@ -2004,7 +2024,34 @@ module GFS_typedefs
     !--- Extra PBL diagnostics
     real (kind=kind_phys), pointer :: dkt(:,:)       => null()  !< Eddy diffusitivity for heat
     real (kind=kind_phys), pointer :: dku(:,:)       => null()  !< Eddy diffusitivity for momentum
-
+!---wamphys-2022 wamphys-diagnostics instantaneous
+!
+    
+#ifdef MULTI_GASES    
+     real (kind=kind_phys), pointer :: dudt_iwamph(:,:)   => null()  !< WAM-tend instant
+     real (kind=kind_phys), pointer :: dvdt_iwamph(:,:)   => null()  !< WAM-tend instant 
+     real (kind=kind_phys), pointer :: dtdt_iwamph(:,:)   => null()  !< WAM-tend instant 
+     real (kind=kind_phys), pointer :: do1dt_iwamph(:,:)  => null()  !< WAM-tend instant  
+     real (kind=kind_phys), pointer :: do2dt_iwamph(:,:)  => null()  !< WAM-tend instant
+     real (kind=kind_phys), pointer :: dqdt_iwamph(:,:)   => null()  !< WAM-tend instant
+     real (kind=kind_phys), pointer :: dudt_wammd(:,:)   => null()  !< WAM-tend instant (molecular diss)
+     real (kind=kind_phys), pointer :: dvdt_wammd(:,:)   => null()  !< WAM-tend instant (molecular diss)
+     real (kind=kind_phys), pointer :: dtdt_wammd(:,:)   => null()  !< WAM-tend instant (molecular diss)
+     real (kind=kind_phys), pointer :: dtdt_wamrad(:,:)   => null()  !< WAM-tend instant (rad_wam)
+     real (kind=kind_phys), pointer :: dudt_wamion(:,:)   => null()  !< WAM-tend instant (ion)
+     real (kind=kind_phys), pointer :: dvdt_wamion(:,:)   => null()  !< WAM-tend instant (ion)
+     real (kind=kind_phys), pointer :: dtdt_wamion(:,:)   => null()  !< WAM-tend instant (ion)
+     real (kind=kind_phys), pointer :: zmt_ipe(:,:)       => null()  !< WAM-IPE
+     real (kind=kind_phys), pointer :: mmt_ipe(:,:)       => null()  !< WAM-IPE  
+     real (kind=kind_phys), pointer :: jhr_ipe(:,:)       => null()  !< WAM-IPE             
+     real (kind=kind_phys), pointer :: shr_ipe(:,:)       => null()  !< WAM-IPE
+     real (kind=kind_phys), pointer :: o2dr_ipe(:,:)      => null()  !< WAM-IPE 
+!     real(kind=kind_phys) :: csw_f107,  csw_f107d, csw_kp,    csw_kpa  
+!     real(kind=kind_phys) :: csw_nhp,   csw_nhpi,  csw_shp,   csw_shpi, csw_den, csw_ang 
+!     real(kind=kind_phys) :: csw_bz,    csw_bt,    csw_vel     
+!     integer              :: sw_ktprev                 
+#endif 
+!
 !
 !---vay-2018 UGWP-diagnostics instantaneous
 !
@@ -2069,6 +2116,20 @@ module GFS_typedefs
     real (kind=kind_phys), pointer :: dws3dt_oss(:,:) => null()  !< time aver GFS_phys tend for windspeed OSS
     real (kind=kind_phys), pointer :: dws3dt_ofd(:,:) => null()  !< time aver GFS_phys tend for windspeed OFD
 !
+#ifdef MULTI_GASES   
+    real (kind=kind_phys), pointer :: dudt_wamph(:,:)  => null()   !< dailyaver WAM_phys tend for WE-U 
+    real (kind=kind_phys), pointer :: dvdt_wamph(:,:)  => null()   !< daily aver WAM_phys tend for SN-V
+    real (kind=kind_phys), pointer :: dtdt_wamph(:,:)  => null()   !< daily aver WAM_phys tend for Temp
+    real (kind=kind_phys), pointer :: do1dt_wamph(:,:) => null()   !< daily aver WAM_phys tend for O
+    real (kind=kind_phys), pointer :: do2dt_wamph(:,:) => null()   !< daily aver WAM_phys tend for O2  
+    real (kind=kind_phys), pointer :: du3dt_wammd(:,:)  => null()  !< daily aver WAM_phys tend for WE-U (molecular diss)
+    real (kind=kind_phys), pointer :: dv3dt_wammd(:,:)  => null()  !< daily aver WAM_phys tend for SN-V (molecular diss)
+    real (kind=kind_phys), pointer :: dt3dt_wammd(:,:)  => null()  !< daily aver WAM_phys tend for Temp (molecular diss)
+    real (kind=kind_phys), pointer :: dt3dt_wamrad(:,:)  => null()  !< daily aver WAM_phys tend for Temp (rad_wam)
+    real (kind=kind_phys), pointer :: du3dt_wamion(:,:)  => null()  !< daily aver WAM_phys tend for WE-U (ion)
+    real (kind=kind_phys), pointer :: dv3dt_wamion(:,:)  => null()  !< daily aver WAM_phys tend for SN-V (ion)
+    real (kind=kind_phys), pointer :: dt3dt_wamion(:,:)  => null()  !< daily aver WAM_phys tend for Temp (ion)     
+#endif
     real (kind=kind_phys), pointer :: ldu3dt_ngw(:,:) => null()  !< time aver GFS_phys tend for u wind NGW
     real (kind=kind_phys), pointer :: ldv3dt_ngw(:,:) => null()  !< time aver GFS_phys tend for v wind NGW
     real (kind=kind_phys), pointer :: ldt3dt_ngw(:,:) => null()  !< time aver GFS_phys tend for temperature NGW
@@ -3288,8 +3349,12 @@ module GFS_typedefs
     logical              :: use_med_flux   = .false.         !< default no atmosphere-ocean fluxes from mediator
 
 !--- integrated dynamics through earth's atmosphere
+!--- WAM-IPE controls and defaults in FV3GFS physics
     logical              :: lsidea         = .false.
-
+    logical              :: do_wamphys     = .false.
+    logical              :: do_wamgfs_rad  = .false.      
+    logical              :: do_wamipe      = .false. 
+    logical              :: do_wamphys_diag= .false.   
 !--- radiation parameters
     real(kind=kind_phys) :: fhswr          = 3600.           !< frequency for shortwave radiation (secs)
     real(kind=kind_phys) :: fhlwr          = 3600.           !< frequency for longwave radiation (secs)
@@ -3915,13 +3980,11 @@ module GFS_typedefs
                           !--- coupling parameters
                                cplflx, cplice, cplocn2atm, cplwav, cplwav2atm, cplaqm,      &
                                cplchm, cpllnd, cpl_imp_mrg, cpl_imp_dbg, rrfs_sd,           &
-                               use_cice_alb,                                                &
-#ifdef IDEA_PHYS
-                               lsidea, weimer_model, f107_kp_size, f107_kp_interval,        &
-                               f107_kp_skip_size, f107_kp_data_size, f107_kp_read_in_start, &
-                               ipe_to_wam_coupling,                                         &
+                               use_cice_alb, use_med_flux,                                  &
+#ifdef MULTI_GASES
+                               lsidea, do_wamphys, do_wamgfs_rad,do_wamipe,do_wamphys_diag, & 
 #else
-                               lsidea, use_med_flux,                                        &
+                                lsidea,                                                     &
 #endif
                           !--- radiation parameters
                                fhswr, fhlwr, levr, nfxr, iaerclm, iflip, isol, ico2, ialb,  &
@@ -4071,6 +4134,7 @@ module GFS_typedefs
 
     integer :: itrac, ipat, ichem
     logical :: have_pbl, have_dcnv, have_scnv, have_mp, have_oz_phys, have_samf, have_pbl_edmf, have_cnvtrans, have_rdamp
+    logical :: have_wamphys ! WAMPHYS
     character(len=20) :: namestr
     character(len=44) :: descstr
 
@@ -4132,6 +4196,7 @@ module GFS_typedefs
     Model%flag_for_pbl_generic_tend = .true.
     Model%flag_for_scnv_generic_tend = .true.
     Model%flag_for_dcnv_generic_tend = .true.
+    Model%flag_for_wam_generic_tend = .false.
 
     Model%lightning_threat = lightning_threat
 
@@ -4302,13 +4367,56 @@ module GFS_typedefs
 
 !--- integrated dynamics through earth's atmosphere
     Model%lsidea           = lsidea
-    if (Model%lsidea) then
-      print *,' LSIDEA is active but needs to be reworked for FV3 - shutting down'
-      stop
+#ifdef MULTI_GASES
+    if (do_wamphys) then    
+      Model%do_wamphys     = do_wamphys
+      Model%do_wamgfs_rad  = do_wamgfs_rad                                   
+      Model%do_wamipe      = do_wamipe
+      Model%do_wamphys_diag= do_wamphys_diag  
+      Model%flag_for_wam_generic_tend = .true.      
+!      Model%wam_JH0        = wam_JH0
+!      Model%wam_JH_tanh    = wam_JH_tanh
+!      Model%wam_JH_semiann = wam_JH_semiann
+!      Model%wam_JH_ann     = wam_JH_ann
+!      Model%wam_JH_sto     = wam_JH_sto
+!      Model%wam_JH_st1     = wam_JH_st1      
+!      Model%wam_skeddy0    = wam_skeddy0
+!      Model%wam_skeddy_ann = wam_skeddy_ann
+!      Model%wam_skeddy_semiann = wam_skeddy_semiann
+!      Model%wam_tkeddy0    = wam_tkeddy0
+!      Model%wam_tkeddy_ann = wam_tkeddy_ann
+!      Model%wam_tkeddy_semiann = wam_tkeddy_semiann      
+!      Model%wam_f107_fix   = wam_f107_fix		       
+!      Model%wam_f107_fixa  = wam_f107_fixa
+!      Model%wam_kp_fix     = wam_kp_fix
+!      Model%wam_Gw_fix     = wam_gw_fix
+!      Model%wam_tiros_activity_fix =  wam_tiros_activity_fix  
+!???   Model%weimer_model     = weimer_model 
+! 16 csw_f107, csw_f107d,  csw_kp, csw_kpa, csw_ap, csw_apa  
+!!!    csw_nhp,  csw_nhpi,  csw_shp,   csw_shpi, csw_den, csw_ang 
+!!!      csw_bz,   csw_bt,    csw_vel,   csw_time  	
+!!!!!!  CONSTANTS !!!!!!!!!!!!!!!!!!!
+       Model%csw_f107 = 100.  
+       Model%csw_f107d = 100. 
+       Model%csw_kp = 3.  
+       Model%csw_kpa = 3.
+!       Model%csw_ap = 100.
+!       Model%csw_apa = 100.
+       Model%csw_nhp = 20.
+       Model%csw_nhpi = 6.
+       Model%csw_shp = 20.
+       Model%csw_shpi = 5.
+       Model%csw_den = 6.
+       Model%csw_ang = 220.
+       Model%csw_bz = -1.
+       Model%csw_bt = 6.
+       Model%csw_vel = 450.
+!       Model%csw_time = 100.
+                             			             
+    else 
+      print *,' do_wamphys => .false.'    
+!      stop   ! mpi-stop  
     endif
-#ifdef IDEA_PHYS
-!--- integrated dynamics through earth's atmosphere
-    Model%weimer_model     = weimer_model
 #endif
 
 !--- calendars and time parameters and activation triggers
@@ -5051,7 +5159,7 @@ module GFS_typedefs
     Model%tracer_names(:)  = tracer_names(:)
     Model%ntqv             = 1
 #ifdef MULTI_GASES
-    Model%nto              = get_tracer_index(Model%tracer_names, 'spo',        Model%me, Model%master, Model%debug)
+    Model%nto1              = get_tracer_index(Model%tracer_names, 'spo',        Model%me, Model%master, Model%debug)
     Model%nto2             = get_tracer_index(Model%tracer_names, 'spo2',       Model%me, Model%master, Model%debug)
     Model%ntoz             = get_tracer_index(Model%tracer_names, 'spo3',       Model%me, Model%master, Model%debug)
 #else
@@ -5115,10 +5223,16 @@ module GFS_typedefs
     Model%index_of_process_nonorographic_gwd = 13
     Model%index_of_process_conv_trans = 14
     Model%index_of_process_dfi_radar = 15
-
-    ! Number of processes to sum (last index of prior set)
-    Model%nprocess_summed = Model%index_of_process_dfi_radar
-
+    if (do_wamphys) then
+      Model%index_of_process_wammd = 16
+      Model%index_of_process_wamrad = 17
+      Model%index_of_process_wamion = 18
+      Model%index_of_process_wamphys = 19
+      Model%nprocess_summed = Model%index_of_process_wamphys
+    else
+      ! Number of processes to sum (last index of prior set)
+      Model%nprocess_summed = Model%index_of_process_dfi_radar
+    endif
     ! Sums of other processes, which must be after nprocess_summed:
     Model%index_of_process_physics = Model%nprocess_summed+1
     Model%index_of_process_non_physics = Model%nprocess_summed+2
@@ -5184,7 +5298,7 @@ module GFS_typedefs
        have_scnv = Model%imfshalcnv>0 !Model%shal_cnv
        have_mp = Model%imp_physics>0
        have_oz_phys = Model%oz_phys .or. Model%oz_phys_2015
-
+       have_wamphys = Model%do_wamphys ! WAM-PHYS
        ! Rayleigh damping flag must match logic in rayleigh_damp.f
        have_rdamp = .not. (Model%lsidea .or. Model%ral_ts <= 0.0 .or. Model%prslrd0 == 0.0)
 
@@ -5267,8 +5381,8 @@ module GFS_typedefs
         call label_dtend_tracer(Model,100+Model%nqrimef,'q_rimef','mass weighted rime factor','kg-1 s-1')
         call label_dtend_tracer(Model,100+Model%ntwa,'liq_aero','number concentration of water-friendly aerosols','kg-1 s-1')
         call label_dtend_tracer(Model,100+Model%ntia,'ice_aero','number concentration of ice-friendly aerosols','kg-1 s-1')
-        call label_dtend_tracer(Model,100+Model%nto,'o_ion','oxygen ion concentration','kg kg-1 s-1')
-        call label_dtend_tracer(Model,100+Model%nto2,'o2','oxygen concentration','kg kg-1 s-1')
+        call label_dtend_tracer(Model,100+Model%nto1,'o1','atomic oxygen ion concentration','kg kg-1 s-1')
+        call label_dtend_tracer(Model,100+Model%nto2,'o2','molecular oxygen concentration','kg kg-1 s-1')
 
         call label_dtend_cause(Model,Model%index_of_process_pbl,'pbl','tendency due to PBL')
         call label_dtend_cause(Model,Model%index_of_process_dcnv,'deepcnv','tendency due to deep convection')
@@ -5289,7 +5403,11 @@ module GFS_typedefs
         call label_dtend_cause(Model,Model%index_of_process_orographic_gwd,'orogwd','tendency due to orographic gravity wave drag')
         call label_dtend_cause(Model,Model%index_of_process_rayleigh_damping,'rdamp','tendency due to Rayleigh damping')
         call label_dtend_cause(Model,Model%index_of_process_nonorographic_gwd,'cnvgwd','tendency due to convective gravity wave drag')
-
+        call label_dtend_cause(Model,Model%index_of_process_wamphys,'wamphys','tendency due to WAM physics')  !WAM-PHYS
+        call label_dtend_cause(Model,Model%index_of_process_wammd,'wammd','tendency due to WAM physics-molecular dissipation')  !WAM-PHYS-molec
+        call label_dtend_cause(Model,Model%index_of_process_wamrad,'wamrad','tendency due to WAM Rad')  !WAM-PHYS-rad
+        call label_dtend_cause(Model,Model%index_of_process_wamion,'wamion','tendency due to WAM ion')  !WAM-PHYS-ion
+ 
        call fill_dtidx(Model,dtend_select,Model%index_of_temperature,Model%index_of_process_longwave)
        call fill_dtidx(Model,dtend_select,Model%index_of_temperature,Model%index_of_process_shortwave)
        call fill_dtidx(Model,dtend_select,Model%index_of_temperature,Model%index_of_process_pbl,have_pbl)
@@ -5302,6 +5420,12 @@ module GFS_typedefs
        call fill_dtidx(Model,dtend_select,Model%index_of_temperature,Model%index_of_process_nonorographic_gwd)
        call fill_dtidx(Model,dtend_select,Model%index_of_temperature,Model%index_of_process_physics)
        call fill_dtidx(Model,dtend_select,Model%index_of_temperature,Model%index_of_process_non_physics)
+       !WAM-PHYS
+       call fill_dtidx(Model,dtend_select,Model%index_of_temperature,Model%index_of_process_wamphys,have_wamphys) 
+       call fill_dtidx(Model,dtend_select,Model%index_of_temperature,Model%index_of_process_wammd,have_wamphys) !WAM-PHYS-molec
+       call fill_dtidx(Model,dtend_select,Model%index_of_temperature,Model%index_of_process_wamrad,have_wamphys) !WAM-PHYS-rad
+       call fill_dtidx(Model,dtend_select,Model%index_of_temperature,Model%index_of_process_wamion,have_wamphys) !WAM-PHYS-ion
+
 
        call fill_dtidx(Model,dtend_select,Model%index_of_x_wind,Model%index_of_process_pbl,have_pbl)
        call fill_dtidx(Model,dtend_select,Model%index_of_y_wind,Model%index_of_process_pbl,have_pbl)
@@ -5319,11 +5443,17 @@ module GFS_typedefs
        call fill_dtidx(Model,dtend_select,Model%index_of_y_wind,Model%index_of_process_physics)
        call fill_dtidx(Model,dtend_select,Model%index_of_x_wind,Model%index_of_process_non_physics)
        call fill_dtidx(Model,dtend_select,Model%index_of_y_wind,Model%index_of_process_non_physics)
-
+       !WAM-PHYS
+       call fill_dtidx(Model,dtend_select,Model%index_of_x_wind,Model%index_of_process_wamphys,have_wamphys) 
+       call fill_dtidx(Model,dtend_select,Model%index_of_y_wind,Model%index_of_process_wamphys,have_wamphys)
+       call fill_dtidx(Model,dtend_select,Model%index_of_x_wind,Model%index_of_process_wammd,have_wamphys)
+       call fill_dtidx(Model,dtend_select,Model%index_of_y_wind,Model%index_of_process_wammd,have_wamphys)
+       call fill_dtidx(Model,dtend_select,Model%index_of_x_wind,Model%index_of_process_wamion,have_wamphys)
+       call fill_dtidx(Model,dtend_select,Model%index_of_y_wind,Model%index_of_process_wamion,have_wamphys)
        if(qdiag3d) then
           call fill_dtidx(Model,dtend_select,100+Model%ntqv,Model%index_of_process_scnv,have_scnv)
           call fill_dtidx(Model,dtend_select,100+Model%ntqv,Model%index_of_process_dcnv,have_dcnv)
-
+          call fill_dtidx(Model,dtend_select,100+Model%ntqv,Model%index_of_process_wamphys,have_wamphys) ! WAM-PHYS
           if(have_cnvtrans) then
              do itrac=2,Model%ntrac
                 if(itrac==Model%ntchs) exit ! remaining tracers are chemical
@@ -5361,7 +5491,11 @@ module GFS_typedefs
           call fill_dtidx(Model,dtend_select,100+Model%ntoz,Model%index_of_process_photochem,have_oz_phys)
           call fill_dtidx(Model,dtend_select,100+Model%ntoz,Model%index_of_process_physics,.true.)
           call fill_dtidx(Model,dtend_select,100+Model%ntoz,Model%index_of_process_non_physics,.true.)
-
+          ! WAM-PHYS O3, O1, O2
+          call fill_dtidx(Model,dtend_select,100+Model%ntoz,Model%index_of_process_wamphys,have_wamphys) 
+          call fill_dtidx(Model,dtend_select,100+Model%nto1,Model%index_of_process_wamphys,have_wamphys) 
+          call fill_dtidx(Model,dtend_select,100+Model%nto2,Model%index_of_process_wamphys,have_wamphys) 
+       
           if(.not.Model%do_mynnedmf .and. .not. Model%satmedmf) then
             call fill_dtidx(Model,dtend_select,100+Model%ntqv,Model%index_of_process_pbl,have_pbl)
             call fill_dtidx(Model,dtend_select,100+Model%ntcw,Model%index_of_process_pbl,have_pbl)
@@ -6830,6 +6964,8 @@ module GFS_typedefs
       print *, ' nqrimef           : ', Model%nqrimef
       print *, ' ntqv              : ', Model%ntqv
       print *, ' ntoz              : ', Model%ntoz
+      print *, ' nto1              : ', Model%nto1
+      print *, ' nto2              : ', Model%nto2
       print *, ' ntcw              : ', Model%ntcw
       print *, ' ntiw              : ', Model%ntiw
       print *, ' ntrw              : ', Model%ntrw
@@ -6852,7 +6988,7 @@ module GFS_typedefs
       print *, ' nthz              : ', Model%nthz
       print *, ' ntke              : ', Model%ntke
       print *, ' ntsigma           : ', Model%ntsigma
-      print *, ' nto               : ', Model%nto
+      print *, ' nto1              : ', Model%nto1
       print *, ' nto2              : ', Model%nto2
       print *, ' ntwa              : ', Model%ntwa
       print *, ' ntia              : ', Model%ntia
@@ -6908,6 +7044,30 @@ module GFS_typedefs
       print *, ' first_time_step   : ', Model%first_time_step
       print *, ' restart           : ', Model%restart
       print *, ' lsm_cold_start    : ', Model%lsm_cold_start
+    if (Model%do_wamphys) then
+      print *, ' WAM physics: control and tunable parameters ' 
+      print *, ' do_wamgfs_rad     : ', Model%do_wamgfs_rad 
+      print *, ' do_wamipe         : ', Model%do_wamipe  
+      print *, ' do_wamphys_diag   : ', Model%do_wamphys_diag 
+         
+!      print *, ' wam_JH0           : ',    Model%wam_JH0
+!      print *, ' wam_JH_tanh       : ',      Model%wam_JH_tanh     
+!      print *, ' wam_JH_semian     : ',  Model%wam_JH_semiann      
+!      print *, ' wam_JH_ann        : ',     Model%wam_JH_ann
+      
+!      print *, '      Model%wam_JH_sto     = wam_JH_sto
+!      print *, '      Model%wam_JH_st1     = wam_JH_st1      
+!      print *, '      Model%wam_skeddy0    = wam_skeddy0
+!      print *, '      Model%wam_skeddy_ann = wam_skeddy_ann
+!      print *, '      Model%wam_skeddy_semiann = wam_skeddy_semiann
+!      print *, '      Model%wam_tkeddy0    = wam_tkeddy0
+!      print *, '      Model%wam_tkeddy_ann = wam_tkeddy_ann
+!      print *, '      Model%wam_tkeddy_semiann = wam_tkeddy_semiann      
+!      print *, '      Model%wam_f107_fix   = wam_f107_fix		       
+!      print *, '      Model%wam_f107_fixa  = wam_f107_fixa
+!      print *, '      Model%wam_kp_fix     = wam_kp_fix
+!      print *, '      Model%wam_Gw_fix     = wam_gw_fix               
+      endif
       print *, ' '
       print *, 'lightning threat indexes'
       print *, ' lightning_threat  : ', Model%lightning_threat
@@ -7693,6 +7853,45 @@ module GFS_typedefs
     allocate (Diag%dvdt_gw   (IM,Model%levs))
     allocate (Diag%dtdt_gw   (IM,Model%levs))
     allocate (Diag%kdis_gw   (IM,Model%levs))
+!
+! wamphys-2022
+!    
+    
+#ifdef MULTI_GASES
+    if (Model%do_wamphys) then
+     allocate(Diag%dudt_iwamph(IM,Model%levs)  )
+     allocate(Diag%dvdt_iwamph(IM,Model%levs)  ) 
+     allocate(Diag%dtdt_iwamph(IM,Model%levs)  ) 
+     allocate(Diag%do1dt_wamph(IM,Model%levs)  )  
+     allocate(Diag%do2dt_wamph(IM,Model%levs)  ) 
+     allocate(Diag%dt3dt_wammd(IM,Model%levs)  ) 
+     allocate(Diag%dt3dt_wamrad(IM,Model%levs)  ) 
+     allocate(Diag%dt3dt_wamion(IM,Model%levs)  ) 
+     allocate(Diag%du3dt_wammd(IM,Model%levs)  )
+     allocate(Diag%du3dt_wamion(IM,Model%levs)  )
+     allocate(Diag%dv3dt_wammd(IM,Model%levs)  )
+     allocate(Diag%dv3dt_wamion(IM,Model%levs)  )
+     allocate(Diag%do1dt_iwamph(IM,Model%levs)  )  
+     allocate(Diag%do2dt_iwamph(IM,Model%levs)  ) 
+     allocate(Diag%dqdt_iwamph(IM,Model%levs)  ) 
+     allocate(Diag%dudt_wammd(IM,Model%levs)  )
+     allocate(Diag%dvdt_wammd(IM,Model%levs)  ) 
+     allocate(Diag%dtdt_wammd(IM,Model%levs)  )   
+     allocate(Diag%dtdt_wamrad(IM,Model%levs)  )   
+     allocate(Diag%dudt_wamion(IM,Model%levs)  )
+     allocate(Diag%dvdt_wamion(IM,Model%levs)  ) 
+     allocate(Diag%dtdt_wamion(IM,Model%levs)  )   
+     allocate(Diag%zmt_ipe(IM,Model%levs)  )
+     allocate(Diag%mmt_ipe(IM,Model%levs)  )  
+     allocate(Diag%jhr_ipe(IM,Model%levs)  ) 
+     allocate(Diag%shr_ipe(IM,Model%levs)  )
+     allocate(Diag%o2dr_ipe(IM,Model%levs)  ) 
+     allocate(Diag%dudt_wamph(IM,Model%levs)  )
+     allocate(Diag%dvdt_wamph(IM,Model%levs)  )
+     allocate(Diag%dtdt_wamph(IM,Model%levs)  )
+                                        
+    endif      
+#endif
 
     if (Model%ldiag_ugwp) then
       allocate (Diag%du3dt_dyn  (IM,Model%levs) )
@@ -8100,7 +8299,22 @@ module GFS_typedefs
 !COORDE
       Diag%du3dt_dyn   = zero
     endif
-
+#ifdef MULTI_GASES
+    if (Model%do_wamphys) then
+      Diag%dudt_wamph    = zero
+      Diag%dvdt_wamph    = zero
+      Diag%dtdt_wamph    = zero  
+      Diag%du3dt_wammd    = zero
+      Diag%dv3dt_wammd    = zero
+      Diag%dt3dt_wammd    = zero  
+      Diag%du3dt_wamion    = zero
+      Diag%dv3dt_wamion    = zero
+      Diag%dt3dt_wamion    = zero 
+      Diag%dt3dt_wamrad    = zero  
+      Diag%do1dt_wamph   = zero   
+      Diag%do2dt_wamph   = zero                                   
+    endif      
+#endif
 !
 !-----------------------------
 

@@ -21,6 +21,8 @@ VARIABLE_DEFINITION_FILES = [
     'physics/physics/Radiation/RRTMG/radlw_param.f',
     'physics/physics/photochem/h2o_def.f',
     'physics/physics/photochem/module_ozphys.F90',
+    'physics/physics/WAM_phys/wamphys_swdef.F90', 
+    'physics/physics/radiation_surface.f',
     'data/CCPP_typedefs.F90',
     'data/GFS_typedefs.F90',
     'data/CCPP_data.F90',
