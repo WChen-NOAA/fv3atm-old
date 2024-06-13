@@ -1463,9 +1463,7 @@ module GFS_typedefs
     integer              :: ntgz            !< tracer index for graupel reflectivity
     integer              :: nthz            !< tracer index for hail reflectivity
     integer              :: ntke            !< tracer index for kinetic energy
-    integer              :: ntsigma         !< tracer index for updraft area fraction
-!    integer              :: nto             !< tracer index for oxygen ion
-!    integer              :: nto2            !< tracer index for oxygen
+    integer              :: ntsigma         !< tracer index for updraft area fraction  
     integer              :: ntwa            !< tracer index for water friendly aerosol
     integer              :: ntia            !< tracer index for ice friendly aerosol
     integer              :: ntsmoke         !< tracer index for smoke
