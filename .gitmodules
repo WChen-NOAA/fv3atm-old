@@ -1,7 +1,8 @@
 [submodule "atmos_cubed_sphere"]
    path = atmos_cubed_sphere
    url = https://github.com/WChen-NOAA/GFDL_atmos_cubed_sphere
-   branch = wamhr3
+    branch = wamdevb
+#   branch = wamhr3
 #   branch = wam2ck
 #  url = https://github.com/KevinViner-NOAA/GFDL_atmos_cubed_sphere
 #  branch = wam2c
@@ -18,7 +19,8 @@
 [submodule "ccpp/physics"]
   path = ccpp/physics
   url = https://github.com/WChen-NOAA/ccpp-physics
-  branch = wamhr3
+  branch = wamdevb
+#  branch = wamhr3
 #  branch = wamlocaldev
 #  branch = wam2c
 #  url = https://github.com/ufs-community/ccpp-physics
